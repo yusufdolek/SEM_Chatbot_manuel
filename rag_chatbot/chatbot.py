@@ -11,7 +11,7 @@ vector_store = FaissVectorStore(EMBEDDING_DIM)
 
 # Check if vector store exists, else build it
 def setup_vector_store():
-    if not (os.path.exists('faiss_index.bin') and os.path.exists('faiss_metadata.pkl')):
+    if not (os.path.exists('faiss_index.bin') and os.path.exists('faiss_metadata.pkl') and False):
         print("INFO:Vector store not found. Building a new one...") #
         # docs = load_documents()
         chunks = load_and_chunk_documents()

@@ -34,7 +34,7 @@ class FaissVectorStore:
 
     # --- BU FONKSİYONUN DA DOĞRU OLDUĞUNDAN EMİN OLUN ---
     # --- MEVCUT `search` FONKSİYONUNU BU YENİ VERSİYONLA DEĞİŞTİRİN ---
-    def search(self, query_embedding, top_k=5, score_threshold=0.7):
+    def search(self, query_embedding, top_k=5, score_threshold=0.01):
         if self.index.ntotal == 0:
             return []
 
