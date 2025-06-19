@@ -34,38 +34,30 @@ class FaissVectorStore:
 
     # --- BU FONKSİYONUN DA DOĞRU OLDUĞUNDAN EMİN OLUN ---
     # --- MEVCUT `search` FONKSİYONUNU BU YENİ VERSİYONLA DEĞİŞTİRİN ---
-    def search(self, query_embedding, top_k=5):
-        """
-        Verilen sorgu vektörüne en yakın `top_k` adet dokümanı bulur.
-        Sadece metin içeriğini değil, tüm metadata nesnesini döndürür.
-        """
-        if self.index.ntotal == 0: # Eğer veritabanı boşsa hata vermemesi için kontrol
+    def search(self, query_embedding, top_k=5, score_threshold=0.7):
+        if self.index.ntotal == 0:
             return []
 
-        D, I = self.index.search(np.array([query_embedding]).astype('float32'), top_k)
+        distances, indices = self.index.search(np.array([query_embedding]).astype('float32'), top_k)
         
-        # I[0] listesi, bulunan en yakın vektörlerin indekslerini içerir.
-        # Bu indeksler, self.metadata listesindeki sıralamayla aynıdır.
+        # --- HATA AYIKLAMA İÇİN BU SATIRI EKLEYİN ---
+        print("--- DEBUG: Raw Scores ---")
         
-        # Bulunan indekslere karşılık gelen metadata nesnelerini döndür
-        results = [self.metadata[idx] for idx in I[0] if idx < len(self.metadata)]
-        
-        return results
-    
-    def search_with_metadata(self, query_embedding, top_k=5):
-        """
-        Verilen sorgu vektörüne en yakın `top_k` adet dokümanı bulur.
-        Sadece metin içeriğini değil, tüm metadata nesnesini döndürür.
-        """
-        if self.index.ntotal == 0: # Eğer veritabanı boşsa hata vermemesi için kontrol
-            return []
+        results = []
+        for i, idx in enumerate(indices[0]):
+            if idx == -1:
+                continue
 
-        D, I = self.index.search_with_metadata(np.array([query_embedding]).astype('float32'), top_k)
+            score = 1.0 / (1.0 + distances[0][i])
+            
+            # --- HATA AYIKLAMA İÇİN BU SATIRI EKLEYİN ---
+            print(f"Chunk {idx}: Score = {score:.4f}")
+            
+            if score >= score_threshold:
+                retrieved_item = self.metadata[idx]
+                results.append((retrieved_item, score))
         
-        # I[0] listesi, bulunan en yakın vektörlerin indekslerini içerir.
-        # Bu indeksler, self.metadata listesindeki sıralamayla aynıdır.
-        
-        # Bulunan indekslere karşılık gelen metadata nesnelerini döndür
-        results = [self.metadata[idx] for idx in I[0] if idx < len(self.metadata)]
+        # --- HATA AYIKLAMA İÇİN BU SATIRI EKLEYİN ---
+        print(f"--- Found {len(results)} chunks above threshold {score_threshold} ---")
         
         return results
