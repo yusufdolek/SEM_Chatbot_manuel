@@ -1,6 +1,6 @@
 import os
 from langchain.document_loaders import PyPDFLoader, TextLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter, MarkdownHeaderTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 DOCS_PATH = 'company_docs'
 
@@ -19,5 +19,5 @@ def load_documents():
 
 # Split documents into chunks for retrieval
 def chunk_documents(documents, chunk_size=500, chunk_overlap=100):
-    splitter = MarkdownHeaderTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     return splitter.split_documents(documents) 
