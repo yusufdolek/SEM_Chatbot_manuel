@@ -1,4 +1,4 @@
-from .document_loader import load_documents, chunk_documents
+from .document_loader import load_and_chunk_documents
 from .embedding import LocalEmbeddingFunction
 from .vector_store import FaissVectorStore
 from .llm import generate_answer
@@ -13,8 +13,8 @@ vector_store = FaissVectorStore(EMBEDDING_DIM)
 def setup_vector_store():
     if not (os.path.exists('faiss_index.bin') and os.path.exists('faiss_metadata.pkl')):
         print("INFO:Vector store not found. Building a new one...") #
-        docs = load_documents()
-        chunks = chunk_documents(docs)
+        # docs = load_documents()
+        chunks = load_and_chunk_documents()
         
         # 2. Embedding için metinleri ve saklamak için metadataları hazırla
         texts_for_embedding = [chunk.page_content for chunk in chunks]
@@ -36,19 +36,39 @@ def setup_vector_store():
 
 def get_chatbot_response(user_message):
     query_embedding = embedding_fn.embed_query(user_message)
-    top_chunks_content = vector_store.search(query_embedding, top_k=10)
     
-    # --- HATA AYIKLAMA İÇİN BU SATIRLARI EKLEYİN ---
-    print("="*50)
-    print(f"KULLANICI SORUSU: {user_message}")
-    print("--- LLM'e GÖNDERİLEN İLK 10 CHUNK ---")
-    for i, chunk in enumerate(top_chunks_content):
-        print(f"--- CHUNK {i+1} ---")
-        print(chunk)
-    print("="*50)
-    # --- HATA AYIKLAMA BİTTİ ---
+    # search fonksiyonu artık bize {"page_content": ..., "metadata": ...} döndürmeli
+    # vector_store.py'deki search fonksiyonunu buna göre güncelleyin.
+    # Önceki adımdaki gibi 'page_content' döndürmek yerine tüm nesneyi döndürsün.
+    top_chunks = vector_store.search(query_embedding, top_k=3) # Yeni bir fonksiyon yazmak daha temiz olur
 
-    context = '\n\n---\n\n'.join(top_chunks_content)
+    # CONTEXT'İ AKILLICA OLUŞTURMA
+    context_parts = []
+    for chunk in top_chunks:
+        # chunk artık {"page_content": "...", "metadata": {"source": "...", "Header 1": "..."}} formatında
+        metadata = chunk.get('metadata', {}) # Hata almamak için .get() kullanalım
+        page_content = chunk.get('page_content', '')
+        
+        header_info = ""
+        # Metadata içindeki başlıkları hiyerarşik olarak birleştir
+        if 'Header 1' in metadata:
+            header_info += f"From Section: {metadata['Header 1']}"
+        if 'Header 2' in metadata:
+            header_info += f" > {metadata['Header 2']}"
+        if 'Header 3' in metadata:
+            header_info += f" > {metadata['Header 3']}"
+        
+        # Eğer başlık bilgisi varsa, içeriğin başına ekle
+        if header_info:
+            context_parts.append(f"{header_info}\n---\n{page_content}")
+        else:
+            context_parts.append(page_content)
+
+    context = '\n\n'.join(context_parts)
+    
+    # Hata ayıklama için context'i yazdırabilirsiniz:
+    # print(context)
+    
     answer = generate_answer(user_message, context)
     return answer
 

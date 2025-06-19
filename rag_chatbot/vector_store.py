@@ -33,11 +33,39 @@ class FaissVectorStore:
                 self.metadata = pickle.load(f)
 
     # --- BU FONKSİYONUN DA DOĞRU OLDUĞUNDAN EMİN OLUN ---
+    # --- MEVCUT `search` FONKSİYONUNU BU YENİ VERSİYONLA DEĞİŞTİRİN ---
     def search(self, query_embedding, top_k=5):
+        """
+        Verilen sorgu vektörüne en yakın `top_k` adet dokümanı bulur.
+        Sadece metin içeriğini değil, tüm metadata nesnesini döndürür.
+        """
+        if self.index.ntotal == 0: # Eğer veritabanı boşsa hata vermemesi için kontrol
+            return []
+
         D, I = self.index.search(np.array([query_embedding]).astype('float32'), top_k)
-        results = []
-        for idx in I[0]:
-            if idx < len(self.metadata):
-                retrieved_item = self.metadata[idx]
-                results.append(retrieved_item['page_content'])
+        
+        # I[0] listesi, bulunan en yakın vektörlerin indekslerini içerir.
+        # Bu indeksler, self.metadata listesindeki sıralamayla aynıdır.
+        
+        # Bulunan indekslere karşılık gelen metadata nesnelerini döndür
+        results = [self.metadata[idx] for idx in I[0] if idx < len(self.metadata)]
+        
+        return results
+    
+    def search_with_metadata(self, query_embedding, top_k=5):
+        """
+        Verilen sorgu vektörüne en yakın `top_k` adet dokümanı bulur.
+        Sadece metin içeriğini değil, tüm metadata nesnesini döndürür.
+        """
+        if self.index.ntotal == 0: # Eğer veritabanı boşsa hata vermemesi için kontrol
+            return []
+
+        D, I = self.index.search_with_metadata(np.array([query_embedding]).astype('float32'), top_k)
+        
+        # I[0] listesi, bulunan en yakın vektörlerin indekslerini içerir.
+        # Bu indeksler, self.metadata listesindeki sıralamayla aynıdır.
+        
+        # Bulunan indekslere karşılık gelen metadata nesnelerini döndür
+        results = [self.metadata[idx] for idx in I[0] if idx < len(self.metadata)]
+        
         return results

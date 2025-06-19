@@ -6,7 +6,7 @@ GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 genai.configure(api_key=GEMINI_API_KEY)
 
 # Use the correct model name for Gemini (e.g., 'gemini-1.5-pro' or 'gemini-pro')
-MODEL_NAME = 'gemini-2.5-flash'
+MODEL_NAME = 'gemini-2.0-flash'
 
 SYSTEM_INSTRUCTION = """
 You are SEM's expert, professional, and persuasive digital assistant. Your primary directive is to answer questions using ONLY the provided context. NEVER invent information.
