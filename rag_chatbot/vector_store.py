@@ -1,4 +1,4 @@
-# vector_store.py DOSYASINDAKİ DOĞRU KOD
+# vector_store.py
 
 import faiss
 import numpy as np
@@ -11,14 +11,16 @@ METADATA_PATH = 'faiss_metadata.pkl'
 class FaissVectorStore:
     def __init__(self, embedding_dim):
         self.embedding_dim = embedding_dim
-        self.index = faiss.IndexFlatL2(embedding_dim)
-        self.metadata = [] # Bu satırı bu şekilde bırakalım
+        # Kosinüs benzerliği için İç Çarpım endeksini kullan
+        self.index = faiss.IndexFlatIP(embedding_dim)
+        self.metadata = []
 
-    # --- BU FONKSİYONU AŞAĞIDAKİ GİBİ GÜNCELLEYİN ---
-    def add_embeddings(self, embeddings, metadatas_to_store): # İkinci parametrenin adını değiştirelim ki karışmasın
+    def add_embeddings(self, embeddings, metadatas_to_store):
         np_embeddings = np.array(embeddings).astype('float32')
+        # IndexFlatIP için vektörleri normalize et
+        faiss.normalize_L2(np_embeddings)
         self.index.add(np_embeddings)
-        self.metadata.extend(metadatas_to_store) # extend() metodu ile listeye ekleme yapalım
+        self.metadata.extend(metadatas_to_store)
 
     def save(self):
         faiss.write_index(self.index, VECTOR_STORE_PATH)
@@ -32,32 +34,29 @@ class FaissVectorStore:
             with open(METADATA_PATH, 'rb') as f:
                 self.metadata = pickle.load(f)
 
-    # --- BU FONKSİYONUN DA DOĞRU OLDUĞUNDAN EMİN OLUN ---
-    # --- MEVCUT `search` FONKSİYONUNU BU YENİ VERSİYONLA DEĞİŞTİRİN ---
-    def search(self, query_embedding, top_k=5, score_threshold=0.01):
+    def search(self, query_embedding, top_k=5, score_threshold=0.3):
         if self.index.ntotal == 0:
             return []
 
-        distances, indices = self.index.search(np.array([query_embedding]).astype('float32'), top_k)
-        
-        # --- HATA AYIKLAMA İÇİN BU SATIRI EKLEYİN ---
-        print("--- DEBUG: Raw Scores ---")
-        
+        query_vector = np.array([query_embedding]).astype('float32')
+        # Sorgu vektörünü de normalize et
+        faiss.normalize_L2(query_vector)
+
+        # Artık 'scores' doğrudan kosinüs benzerliği puanıdır (0-1 arası)
+        scores, indices = self.index.search(query_vector, top_k)
+        print("\n--- [VECTOR_STORE DEBUG] Raw Search Results (Before Threshold) ---")
         results = []
         for i, idx in enumerate(indices[0]):
             if idx == -1:
                 continue
+            
+            score = scores[0][i]
 
-            score = 1.0 / (1.0 + distances[0][i])
-            
-            # --- HATA AYIKLAMA İÇİN BU SATIRI EKLEYİN ---
-            print(f"Chunk {idx}: Score = {score:.4f}")
-            
+            print(f"  Chunk Index: {idx}, Raw Score: {score:.4f}")
+
             if score >= score_threshold:
                 retrieved_item = self.metadata[idx]
                 results.append((retrieved_item, score))
-        
-        # --- HATA AYIKLAMA İÇİN BU SATIRI EKLEYİN ---
-        print(f"--- Found {len(results)} chunks above threshold {score_threshold} ---")
-        
+
+        print(f"--- [VECTOR_STORE DEBUG] Found {len(results)} chunks above threshold {score_threshold} ---")
         return results

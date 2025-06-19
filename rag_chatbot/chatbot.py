@@ -40,9 +40,9 @@ def get_chatbot_response(user_message):
     top_chunks_with_scores = vector_store.search(
         query_embedding, 
         top_k=5, 
-        score_threshold=0.2
+        score_threshold=0.3
     )
-
+    
     context = ""
 
     if top_chunks_with_scores:

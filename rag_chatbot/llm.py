@@ -65,8 +65,8 @@ def generate_answer(question, context):
     """
 
     generation_config = {
-        "temperature": 0.9,
-        "max_output_tokens": 5000, # Cevabın maksimum uzunluğunu artırır
+        "temperature": 0.7,
+        "max_output_tokens": 4096, # Cevabın maksimum uzunluğunu artırır
     }
     response = model.generate_content(prompt, generation_config=generation_config)
 
