@@ -1,0 +1,194 @@
+/* Genel Sayfa Stili */
+body {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f0f2f5;
+}
+
+/* Tüm widget'ı içeren ve sağ alta sabitleyen ana konteyner */
+.chat-widget-container {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 1000;
+}
+
+/* Tıklayınca açılan sohbet penceresi */
+#chat-widget {
+    position: absolute;
+    bottom: calc(70px + 0px);
+    right: 0;
+    width: 360px; /* EVET, GENİŞLİK 360px OLARAK AYARLI */
+    height: 85vh    ;
+    max-height: 600px;
+    background: #ffffff;
+    
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    /* BU ÖZELLİK, İÇİNDEKİ BAŞLIĞIN KÖŞELERİNİ KIRPARAK YUVARLAK GÖRÜNMESİNİ SAĞLAR (EN ÖNEMLİ KISIM) */
+    overflow: hidden; 
+    font-size: 14px;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transform-origin: bottom right;
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    visibility: hidden;
+}
+
+#chat-widget.is-open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    visibility: visible;
+}
+
+/* Widget Başlığı */
+.chat-header {
+    background: #001E94;
+    height: 82px;
+    color: white;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    position: relative;
+    border-radius: 0 0 20px 20px;
+}
+
+.chat-header-logo {
+    width: 181px;  /* Değiştirildi: `auto` -> `181px` */
+    height: 34px;  /* Değiştirildi: `40px` -> `34px` */
+}
+/* Kapatma Butonu */
+.chat-header .close-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 5px;
+    
+    transition: opacity 0.2s, transform 0.2s;
+    line-height: 1;
+}
+.chat-header .close-btn:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Mesajlar alanı */
+#messages {
+    padding: 20px 10px;
+    flex-grow: 1;
+    overflow-y: auto;
+    background: #F5FCFF;
+}
+
+/* Konuşma Balonları */
+.message {
+    display: flex;
+    margin-bottom: 15px;
+    padding: 0 10px;
+}
+.message.user {
+    justify-content: flex-end;
+}
+.message.bot {
+    justify-content: flex-start;
+}
+.bubble {
+    padding: 12px 18px;
+    border-radius: 16px;
+    max-width: 85%;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+.message.user .bubble {
+    background-color: #DEDEDE;
+    color: #000;
+}
+.message.bot .bubble {
+    background-color: #e6f1ff;
+    color: #000;
+}
+.bubble p { margin: 0 0 10px 0; }
+.bubble p:last-child { margin-bottom: 0; }
+.bubble ul, .bubble ol { padding-left: 20px; margin: 10px 0; }
+.bubble li { margin-bottom: 5px; }
+
+/* Mesaj yazma alanı */
+#input-area {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: #F5FCFF;
+    flex-shrink: 0;
+}
+
+#user-input {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 24px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    background-color: #F9FFFF;
+}
+#user-input:focus {
+    outline: none;
+    border-color: #001E94;
+    background-color: #fff;
+}
+
+/* Gönder Butonu */
+#send-btn {
+    width: 45px;
+    height: 45px;
+    border: none;
+    background-color: #001E94;
+    border-radius: 50%;
+    margin-left: 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, transform 0.2s;
+    padding: 0;
+}
+#send-btn:hover {
+    background-color: #0036d1;
+    transform: scale(1.1);
+}
+#send-btn img {
+    width: 22px;
+    height: 22px;
+}
+
+/* Widget'ı açıp kapatan logo butonu */
+#chat-toggle-btn {
+    
+    border: none;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+#chat-toggle-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+#chat-toggle-btn img {
+    width: 60px;
+    height: 60px;
+}

@@ -43,38 +43,56 @@ def generate_answer(question, context):
 # 3.  **Contact Information:** If the user specifically asks to speak with an expert or how to contact the company, provide this link: https://webtest.semtr.com/contact-us/
 
 # ---
-# **PROVIDED CONTEXT:**
-# {context}
-# ---
-# **USER'S QUESTION:**
-# {question}
-# ---
-# **EXPERT, DETAILED, AND WELL-FORMATTED ANSWER:**
-# """
-    model = genai.GenerativeModel(MODEL_NAME,
-                                  system_instruction=SYSTEM_INSTRUCTION
-                                  )
+    try:
+        # Gemini 2.5 modelini yapılandırıyoruz
+        model = genai.GenerativeModel(MODEL_NAME,
+                                      system_instruction=SYSTEM_INSTRUCTION
+                                      )
 
-    prompt = f"""
-    **Context**:
-    {context}
+        prompt = f"""
+        **Context**:
+        {context}
 
-    ---
-    **Question**:
-    {question}
-    """
+        ---
+        **Question**:
+        {question}
+        """
 
-    generation_config = {
-        "temperature": 0.7,
-        "max_output_tokens": 4096, # Cevabın maksimum uzunluğunu artırır
-    }
-    response = model.generate_content(prompt, generation_config=generation_config)
+        generation_config = {
+            "temperature": 0.7,
+            "max_output_tokens": 4096,
+        }
+        
+        # Hata ayıklama için kritik loglar:
+        # Bu log sayesinde isteğin API'ye gönderilip gönderilmediğini anlarız.
+        print("INFO: Sending request to Gemini 2.5 API...")
+        
+        # --- API ÇAĞRISI BURADA YAPILIYOR ---
+        response = model.generate_content(prompt, generation_config=generation_config)
+        
+        # Bu log sayesinde API'den bir cevap alınıp alınmadığını anlarız.
+        print("INFO: Received response from Gemini 2.5 API.")
 
-    if not response.parts:
-        return "I'm sorry, I was unable to generate a response for that query. Could you please try rephrasing it?"
+        # Bazen cevap döner ama içi boş olabilir (örn: güvenlik filtreleri)
+        if not response.parts:
+            print("WARNING: Gemini response was empty. This might be due to safety filters or other restrictions.")
+            return "I'm sorry, I couldn't generate a response for that. It might have been blocked by a safety filter."
 
-    return response.text.strip() 
+        # Her şey yolundaysa cevabı döndür
+        return response.text.strip()
 
+    except Exception as e:
+        # BU BLOK EN ÖNEMLİSİ!
+        # Gemini'den veya başka bir yerden gelen herhangi bir hatayı yakalar ve konsola yazdırır.
+        # "Donma" sorununun nedenini burada göreceğiz.
+        print("\n" + "="*50)
+        print("!!!!!! FATAL ERROR IN GEMINI API CALL !!!!!!")
+        print(f"Error Type: {type(e).__name__}")
+        print(f"Error Details: {e}")
+        print("="*50 + "\n")
+        
+        # Kullanıcıya sorunun bizden kaynaklandığını belirten bir mesaj döndürür
+        return "Sorry, I encountered an error while communicating with the language model. The technical team has been notified. Please check the server logs for details."
 def get_available_gemini_models_markdown():
     models = []
     for m in genai.list_models():

@@ -1,88 +1,61 @@
+# chatbot.py
+
 from .document_loader import load_and_chunk_documents
 from .embedding import LocalEmbeddingFunction
 from .vector_store import FaissVectorStore
 from .llm import generate_answer
 import os
 
-# On first run, build the vector store
-EMBEDDING_DIM = 384  # all-MiniLM-L6-v2 embedding size
+# Değişkenleri en üste, daha okunaklı bir yere taşıyoruz
+EMBEDDING_DIM = 384
+VECTOR_STORE_PATH = 'faiss_index.bin'
+METADATA_PATH = 'faiss_child_metadata.pkl'
+DOCSTORE_PATH = 'faiss_parent_docstore.pkl'
+
 embedding_fn = LocalEmbeddingFunction()
 vector_store = FaissVectorStore(EMBEDDING_DIM)
 
-# Check if vector store exists, else build it
 def setup_vector_store():
-    if not (os.path.exists('faiss_index.bin') and os.path.exists('faiss_metadata.pkl') and False):
-        print("INFO:Vector store not found. Building a new one...") #
-        # docs = load_documents()
-        chunks = load_and_chunk_documents()
-        
-        # 2. Embedding için metinleri ve saklamak için metadataları hazırla
-        texts_for_embedding = [chunk.page_content for chunk in chunks]
-        metadata_to_store = [
-            {"page_content": chunk.page_content, "metadata": chunk.metadata}
-            for chunk in chunks
-        ]
-
-        # 3. Metinleri vektörlere dönüştür
-        embeddings = embedding_fn.embed_documents(texts_for_embedding)
-        
-
-        vector_store.add_embeddings(embeddings, metadata_to_store)
+    if not all(os.path.exists(p) for p in [VECTOR_STORE_PATH, METADATA_PATH, DOCSTORE_PATH]):
+        print("INFO: Vector store not found, building a new one...")
+        parent_docs, child_docs = load_and_chunk_documents()
+        vector_store.add(parent_docs, child_docs, embedding_fn)
         vector_store.save()
         print("INFO: Vector store built and saved successfully.")
     else:
-        print("INFO: Loading existing vector store.") #
+        print("INFO: Loading existing vector store.")
         vector_store.load()
 
 def get_chatbot_response(user_message):
-    query_embedding = embedding_fn.embed_query(user_message)
+    print("Step 1: get_chatbot_response function started.")
     
-    top_chunks_with_scores = vector_store.search(
+    print("Step 2: Generating query embedding for the user message...")
+    query_embedding = embedding_fn.embed_query(user_message)
+    print("Step 2a: Query embedding generated successfully.")
+    
+    print("Step 3: Searching vector store for relevant documents...")
+    retrieved_parent_docs = vector_store.search(
         query_embedding, 
-        top_k=5, 
-        score_threshold=0.3
+        top_k=10, 
+        score_threshold=0.35 
     )
+    print("Step 3a: Vector store search completed.")
     
     context = ""
-
-    if top_chunks_with_scores:
-        print(f"INFO: Found {len(top_chunks_with_scores)} relevant chunks. Building context...")
-        
-        context_parts = []
-        
-        # --- DÖNGÜYÜ DOĞRU ŞEKİLDE KURUYORUZ ---
-        # Her bir elemanı (chunk_data, score) olarak ikiye ayırıyoruz.
-        for chunk_data, score in top_chunks_with_scores:
-            # chunk_data artık {"page_content": "...", "metadata": {...}} şeklinde bir sözlük
-            metadata = chunk_data.get('metadata', {})
-            page_content = chunk_data.get('page_content', '')
-            
-            header_info = ""
-            if 'Header 1' in metadata:
-                header_info += f"From Section: {metadata['Header 1']}"
-            if 'Header 2' in metadata:
-                header_info += f" > {metadata['Header 2']}"
-            if 'Header 3' in metadata:
-                header_info += f" > {metadata['Header 3']}"
-            
-            # (İsteğe bağlı) Hata ayıklama için puanı da ekleyebiliriz
-            # header_info += f" (Relevance: {score:.2f})"
-            
-            if header_info:
-                context_parts.append(f"{header_info}\n---\n{page_content}")
-            else:
-                context_parts.append(page_content)
-
-        context = '\n\n'.join(context_parts)
-    
+    if retrieved_parent_docs:
+        print(f"Step 4: Found {len(retrieved_parent_docs)} relevant parent document(s). Building context string...")
+        context = "\n\n---\n\n".join(retrieved_parent_docs)
+        print("Step 4a: Context string built successfully.")
     else:
-        print("INFO: No relevant documents found. Sending empty context to LLM.")
+        print("Step 4: No relevant documents found above the threshold.")
 
-    # print(f"--- CONTEXT SENT TO LLM ---\n{context}\n--------------------------") # Gerekirse hata ayıklama için
+    print(f"\n--- CONTEXT TO BE SENT TO LLM ---\n{context[:500]}...\n--------------------------------\n")
     
+    print("Step 5: Calling the LLM (generate_answer) to get the final response...")
     answer = generate_answer(user_message, context)
+    print("Step 6: Received response from LLM.")
     
     return answer
 
-
+# Uygulama başladığında vektör veritabanını kur/yükle
 setup_vector_store()
