@@ -1,5 +1,6 @@
 import os
 import google.generativeai as genai
+from .media_extractor import MediaExtractor
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
@@ -15,9 +16,13 @@ Your response MUST adhere to these rules:
 - Format using markdown: Use **bold headings** and bullet points (`*`). NEVER use long paragraphs. 
 - Emphasize key data, partnerships, and achievements (e.g., "**Google Premier Partner**") in bold.
 - Use a confident, professional, and helpful tone. Use relevant emojis (🚀, 📈).
+- When discussing case studies, focus on objectives and results. Do NOT include Image URL or Video URL lines in your response - these will be handled automatically.
 - If asked for contact info, provide: https://webtest.semtr.com/contact-us/
 - If context is insufficient, state it professionally.
 """
+
+# Initialize media extractor
+media_extractor = MediaExtractor()
 
 # Generate a friendly, concise answer using Gemini LLM
 def generate_answer(question, context):
@@ -78,8 +83,18 @@ def generate_answer(question, context):
             print("WARNING: Gemini response was empty. This might be due to safety filters or other restrictions.")
             return "I'm sorry, I couldn't generate a response for that. It might have been blocked by a safety filter."
 
-        # Her şey yolundaysa cevabı döndür
-        return response.text.strip()
+        # Get the base response from LLM
+        base_response = response.text.strip()
+        print(f"--- [LLM DEBUG] Base response length: {len(base_response)}")
+        
+        # Enhance response with relevant media (images/videos)
+        enhanced_response = media_extractor.enhance_response_with_media(
+            base_response, context, question
+        )
+        print(f"--- [LLM DEBUG] Enhanced response length: {len(enhanced_response)}")
+        print(f"--- [LLM DEBUG] Media added: {len(enhanced_response) > len(base_response)}")
+        
+        return enhanced_response
 
     except Exception as e:
         # BU BLOK EN ÖNEMLİSİ!

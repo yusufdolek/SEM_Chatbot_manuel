@@ -51,7 +51,7 @@ class FaissVectorStore:
             with open(DOCSTORE_PATH, 'rb') as f:
                 self.docstore = pickle.load(f)
 
-    def search(self, query_embedding, top_k=5, score_threshold=0.3):
+    def search(self, query_embedding, top_k=15, score_threshold=0.25):  # Lower threshold, more results
         if self.index.ntotal == 0:
             return []
 
@@ -71,6 +71,11 @@ class FaissVectorStore:
                 retrieved_parent_ids.add(parent_id)
 
         final_context_docs = [self.docstore[pid] for pid in retrieved_parent_ids]
+        
+        # If no results above threshold, try with lower threshold as fallback
+        if not final_context_docs and score_threshold > 0.15:
+            print(f"--- [FALLBACK] No results with threshold {score_threshold}, trying with 0.15")
+            return self.search(query_embedding, top_k, 0.15)
         
         print(f"--- [VECTOR_STORE DEBUG] Found {len(self.metadata)} child docs. "
               f"Search returned {len(retrieved_parent_ids)} unique parent documents.")

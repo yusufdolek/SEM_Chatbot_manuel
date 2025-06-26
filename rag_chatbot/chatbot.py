@@ -34,17 +34,83 @@ def get_chatbot_response(user_message):
     print("Step 2a: Query embedding generated successfully.")
     
     print("Step 3: Searching vector store for relevant documents...")
+    # Try to get documents with detailed case studies
     retrieved_parent_docs = vector_store.search(
         query_embedding, 
         top_k=10, 
-        score_threshold=0.35 
+        score_threshold=0.25  # Even lower for better recall
     )
+    
+    # Check if we have detailed case studies document
+    has_detailed_cases = any('Formula-Based Bidding' in doc or 'Mid-Funnel Growth' in doc for doc in retrieved_parent_docs)
+    
+    # For brand-specific queries, ensure we get the detailed case studies document
+    brand_keywords = ['beymen', 'migros', 'boyner', 'lc waikiki', 'lcwaikiki']
+    is_brand_query = any(brand in user_message.lower() for brand in brand_keywords)
+    
+    if is_brand_query and not has_detailed_cases:
+        # Try specific queries to get the detailed case studies document
+        enhanced_queries = [
+            f"{user_message} formula based bidding search ads",
+            f"{user_message} mid funnel growth demand gen",
+            "case studies success stories with image URL",
+            "projects formula based bidding image"
+        ]
+        
+        for enhanced_query in enhanced_queries:
+            enhanced_embedding = embedding_fn.embed_query(enhanced_query)
+            enhanced_docs = vector_store.search(enhanced_embedding, top_k=5, score_threshold=0.15)
+            
+            # Check if these docs have detailed case studies
+            has_detailed = any('Formula-Based Bidding' in doc or 'Mid-Funnel Growth' in doc for doc in enhanced_docs)
+            if has_detailed:
+                print(f"--- [ENHANCED SEARCH] Found detailed case studies with query: {enhanced_query}")
+                retrieved_parent_docs = enhanced_docs
+                break
+    
+    # If still no detailed cases, try one more fallback for non-brand queries
+    elif not has_detailed_cases:
+        enhanced_queries = [
+            f"{user_message} case study with image",
+            f"{user_message} success story"
+        ]
+        
+        for enhanced_query in enhanced_queries:
+            enhanced_embedding = embedding_fn.embed_query(enhanced_query)
+            enhanced_docs = vector_store.search(enhanced_embedding, top_k=5, score_threshold=0.2)
+            
+            # Check if these docs have what we need
+            has_cases = any('Image URL:' in doc for doc in enhanced_docs)
+            if has_cases:
+                print(f"--- [ENHANCED SEARCH] Found better documents with enhanced query: {enhanced_query}")
+                retrieved_parent_docs = enhanced_docs
+                break
     print("Step 3a: Vector store search completed.")
     
     context = ""
     if retrieved_parent_docs:
         print(f"Step 4: Found {len(retrieved_parent_docs)} relevant parent document(s). Building context string...")
-        context = "\n\n---\n\n".join(retrieved_parent_docs)
+        
+        # Prioritize documents with detailed case studies for brand queries
+        if is_brand_query:
+            # Sort documents: detailed case studies first, others after
+            detailed_docs = []
+            other_docs = []
+            
+            for doc in retrieved_parent_docs:
+                has_detailed_cases = 'Formula-Based Bidding' in doc or 'Mid-Funnel Growth' in doc
+                if has_detailed_cases:
+                    detailed_docs.append(doc)
+                else:
+                    other_docs.append(doc)
+            
+            # Put detailed docs first
+            prioritized_docs = detailed_docs + other_docs
+            print(f"--- [PRIORITIZATION] Moved {len(detailed_docs)} detailed case study documents to front")
+        else:
+            prioritized_docs = retrieved_parent_docs
+        
+        context = "\n\n---\n\n".join(prioritized_docs)
         print("Step 4a: Context string built successfully.")
     else:
         print("Step 4: No relevant documents found above the threshold.")

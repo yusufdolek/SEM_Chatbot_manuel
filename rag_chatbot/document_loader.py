@@ -1,9 +1,20 @@
 # document_loader.py
 
 import os
-import fitz  # PyMuPDF
 import re
 import uuid
+
+# Import PyMuPDF (the correct PDF library)
+try:
+    import pymupdf as fitz  # New PyMuPDF versions use this
+except ImportError:
+    try:
+        import fitz  # Older PyMuPDF versions
+        # Verify this is actually PyMuPDF by checking for Document class
+        if not hasattr(fitz, 'Document'):
+            raise ImportError("Wrong fitz package installed")
+    except (ImportError, AttributeError):
+        raise ImportError("PyMuPDF is required. Install with: pip install PyMuPDF")
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema.document import Document
 
@@ -29,8 +40,12 @@ def load_and_chunk_documents():
         filepath = os.path.join(DOCS_PATH, filename)
         print(f"--> Processing document: {filename}")
         
-        with fitz.open(filepath) as doc:
+        # Open PDF document
+        doc = fitz.open(filepath)
+        try:
             full_text = "".join(page.get_text() for page in doc)
+        finally:
+            doc.close()
 
         # --- ANA MANTIKSAL BLOKLARI (PARENT) OLUŞTURMA ---
 
@@ -46,8 +61,9 @@ def load_and_chunk_documents():
             # parçalara, yani her bir vaka çalışmasına ayıralım.
             if "PROJECTS, SUCCESS STORIES" in section_text[:100]:
                 # Vaka çalışmaları genellikle "• Ad (Kategori):" ile başlıyor. Bu bizim anahtarımız.
-                # `\n• \w+ \(` gibi bir desen, "• Migros (", "• Boyner (" gibi yerleri bulur.
-                case_studies = re.split(r'(?=\n• \s*\w+\s*\()', section_text)
+                # Geliştirilmiş regex: hem tek kelime hem de boşluklu markaları yakalar
+                # Örnek: "• LC WAIKIKI (", "• Migros (", "• Boyner (" vs.
+                case_studies = re.split(r'(?=\n•\s*[A-ZÇĞİİÖŞÜ][A-ZÇĞİİÖŞÜ\s]*\()', section_text)
                 
                 # İlk eleman genellikle bölüm başlığıdır, onu ayrı bir parent yapalım
                 if case_studies[0].strip():
@@ -65,9 +81,9 @@ def load_and_chunk_documents():
     
     child_documents = []
     child_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=512,
-        chunk_overlap=64,
-        separators=["\n\n", "\n", ". ", " "]
+        chunk_size=400,  # Smaller chunks for better precision
+        chunk_overlap=100,  # More overlap to preserve context
+        separators=["\n\n", "\n", ". ", ", ", " "]
     )
     
     for parent_doc in all_parent_documents:
