@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SEM Company Website</title>
     
-    <!-- YENİ: Poppins fontunu Google Fonts'tan ekliyoruz -->
+    <!-- Poppins fontunu Google Fonts'tan ekliyoruz -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
@@ -15,14 +15,107 @@
     
     <!-- Markdown formatlaması için kütüphane -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- YENİ: Sayfa bölümleri için stiller -->
+    <style>
+        /* Tarayıcı varsayılan boşluklarını sıfırlıyoruz */
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth; /* Daha yumuşak bir kaydırma deneyimi için */
+        }
+
+        /* Her bir sayfa bölümü için genel stil */
+        .page-section {
+            height: 100vh; /* Her bölüm ekran yüksekliği kadar olsun */
+            display: flex; /* İçeriği ortalamak için flexbox kullanıyoruz */
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            box-sizing: border-box; /* Padding'in yüksekliği etkilememesi için */
+        }
+
+        .content-wrapper {
+            max-width: 800px;
+        }
+
+        .content-wrapper h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .content-wrapper h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content-wrapper p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+
+        /* Renk Stilleri */
+        #page-white {
+            background-color: #ffffff;
+            color: #333333;
+        }
+
+        #page-gray {
+            background-color: #f4f4f4;
+            color: #333333;
+        }
+
+        #page-black {
+            background-color: #222222;
+            color: #ffffff;
+        }
+
+        #page-navy {
+            background-color: #001f3f; /* Lacivert */
+            color: #ffffff;
+        }
+    </style>
 </head>
 <body>
-    <div style="padding: 40px; font-family: 'Poppins', sans-serif;">
-        <h1>Welcome to SEM</h1>
-        <p>You can ask our chatbot anything about SEM.</p>
-    </div>
 
-    <!-- CHAT WIDGET YAPISI -->
+    <!-- YENİ: Sayfa içeriği bölümlere ayrıldı -->
+    <main>
+        <!-- 1. BEYAZ BÖLÜM -->
+        <section id="page-white" class="page-section">
+            <div class="content-wrapper">
+                <h1>Welcome to SEM</h1>
+                <p>You can ask our chatbot anything about SEM. Try asking about our projects or services.</p>
+            </div>
+        </section>
+
+        <!-- 2. GRİ BÖLÜM -->
+        <section id="page-gray" class="page-section">
+            <div class="content-wrapper">
+                <h2>About Us</h2>
+                <p>We are a leading company in technology and innovation, dedicated to providing cutting-edge solutions for businesses worldwide.</p>
+            </div>
+        </section>
+
+        <!-- 3. SİYAH BÖLÜM -->
+        <section id="page-black" class="page-section">
+            <div class="content-wrapper">
+                <h2>Our Services</h2>
+                <p>From custom software development to advanced data analytics, we offer a wide range of services to help your business grow.</p>
+            </div>
+        </section>
+
+        <!-- 4. LACİVERT BÖLÜM -->
+        <section id="page-navy" class="page-section">
+            <div class="content-wrapper">
+                <h2>Contact Us</h2>
+                <p>Get in touch with us to learn more about how we can help you achieve your goals. Our chatbot is also ready to assist you!</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- CHAT WIDGET YAPISI (Değiştirilmedi, sayfa kayarken sabit kalacak) -->
     <div class="chat-widget-container">
         <div id="chat-widget">
             <div class="chat-header">
@@ -38,7 +131,6 @@
             </div>
             <div id="input-area">
                 <input type="text" id="user-input" placeholder="Type a message..." autofocus />
-                <!-- GÜNCELLENDİ: Gönder butonu artık içinde SVG ikonunu barındırıyor -->
                 <button id="send-btn" aria-label="Send Message">
                     <img src="{{ url_for('static', filename='images/send_icon.svg') }}" alt="Send">
                 </button>
@@ -51,7 +143,7 @@
     </div>
     <!-- WIDGET SONU -->
 
-    <!-- Lightbox HTML Structure -->
+    <!-- Lightbox HTML Structure (Değiştirilmedi) -->
     <div id="lightbox-overlay" class="lightbox-overlay">
         <div class="lightbox-content">
             <img id="lightbox-image" class="lightbox-image" src="" alt="">
@@ -124,7 +216,6 @@
         function closeLightbox() {
             lightboxOverlay.classList.remove('active');
             document.body.classList.remove('lightbox-active');
-            // Clear the image src after transition
             setTimeout(() => {
                 lightboxImage.src = '';
                 lightboxImage.alt = '';
@@ -139,18 +230,15 @@
             }
         });
 
-        // Close lightbox with Escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && lightboxOverlay.classList.contains('active')) {
                 closeLightbox();
             }
         });
 
-        // Add click handlers to images in chat messages
         function addImageClickHandlers() {
             const chatImages = messagesDiv.querySelectorAll('.bubble img');
             chatImages.forEach(img => {
-                // Remove existing listeners to prevent duplicates
                 img.removeEventListener('click', handleImageClick);
                 img.addEventListener('click', handleImageClick);
             });
@@ -161,11 +249,9 @@
             openLightbox(img.src, img.alt);
         }
 
-        // Monitor for new images being added to the chat
         const messageObserver = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.type === 'childList') {
-                    // Check if new images were added
                     mutation.addedNodes.forEach(function(node) {
                         if (node.nodeType === Node.ELEMENT_NODE) {
                             const newImages = node.querySelectorAll ? node.querySelectorAll('img') : [];
@@ -178,7 +264,6 @@
             });
         });
         
-        // Start observing the messages container
         messageObserver.observe(messagesDiv, {
             childList: true,
             subtree: true
