@@ -51,6 +51,14 @@
     </div>
     <!-- WIDGET SONU -->
 
+    <!-- Lightbox HTML Structure -->
+    <div id="lightbox-overlay" class="lightbox-overlay">
+        <div class="lightbox-content">
+            <img id="lightbox-image" class="lightbox-image" src="" alt="">
+            <button id="lightbox-close" class="lightbox-close">×</button>
+        </div>
+    </div>
+
     <!-- JavaScript kodunda değişiklik yok, aynen kalabilir -->
     <script>
         // HTML Elementlerine erişim
@@ -100,6 +108,81 @@
 
         function openWidget() { chatWidget.classList.add('is-open'); userInput.focus(); }
         function closeWidget() { chatWidget.classList.remove('is-open'); }
+        
+        // Lightbox functionality
+        const lightboxOverlay = document.getElementById('lightbox-overlay');
+        const lightboxImage = document.getElementById('lightbox-image');
+        const lightboxClose = document.getElementById('lightbox-close');
+
+        function openLightbox(imageSrc, imageAlt) {
+            lightboxImage.src = imageSrc;
+            lightboxImage.alt = imageAlt;
+            lightboxOverlay.classList.add('active');
+            document.body.classList.add('lightbox-active');
+        }
+
+        function closeLightbox() {
+            lightboxOverlay.classList.remove('active');
+            document.body.classList.remove('lightbox-active');
+            // Clear the image src after transition
+            setTimeout(() => {
+                lightboxImage.src = '';
+                lightboxImage.alt = '';
+            }, 300);
+        }
+
+        // Event listeners for lightbox
+        lightboxClose.addEventListener('click', closeLightbox);
+        lightboxOverlay.addEventListener('click', (e) => {
+            if (e.target === lightboxOverlay) {
+                closeLightbox();
+            }
+        });
+
+        // Close lightbox with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightboxOverlay.classList.contains('active')) {
+                closeLightbox();
+            }
+        });
+
+        // Add click handlers to images in chat messages
+        function addImageClickHandlers() {
+            const chatImages = messagesDiv.querySelectorAll('.bubble img');
+            chatImages.forEach(img => {
+                // Remove existing listeners to prevent duplicates
+                img.removeEventListener('click', handleImageClick);
+                img.addEventListener('click', handleImageClick);
+            });
+        }
+
+        function handleImageClick(e) {
+            const img = e.target;
+            openLightbox(img.src, img.alt);
+        }
+
+        // Monitor for new images being added to the chat
+        const messageObserver = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList') {
+                    // Check if new images were added
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            const newImages = node.querySelectorAll ? node.querySelectorAll('img') : [];
+                            if (newImages.length > 0 || node.tagName === 'IMG') {
+                                addImageClickHandlers();
+                            }
+                        }
+                    });
+                }
+            });
+        });
+        
+        // Start observing the messages container
+        messageObserver.observe(messagesDiv, {
+            childList: true,
+            subtree: true
+        });
         
         sendBtn.addEventListener('click', sendMessage);
         userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
