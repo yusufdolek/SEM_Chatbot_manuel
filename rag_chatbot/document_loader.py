@@ -1,5 +1,3 @@
-# document_loader.py
-
 import os
 import re
 import uuid

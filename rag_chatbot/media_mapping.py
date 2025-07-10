@@ -208,7 +208,6 @@ class MediaMapping:
         
         # Add videos as embeddable iframes
         if media['videos']:
-            html_parts.append("\n**📺 Related Videos:**\n")
             for i, video_url in enumerate(media['videos'], 1):
                 embed_url = self.youtube_url_to_embed(video_url)
                 html_parts.append(f'<iframe src="{embed_url}" style="width: 300px; height: 169px; max-width: 100%; border-radius: 8px; margin: 10px 0; border: none;" allowfullscreen></iframe>')
@@ -226,6 +225,6 @@ class MediaMapping:
             
         media_html = self.format_media_html(media, media['key'].title())
         if media_html:
-            return response + f"\n\n---\n\n**{media['key'].title()} Visual:**\n\n{media_html}\n\n"
+            return response + f"\n\n---\n\n{media_html}\n\n"
             
         return response

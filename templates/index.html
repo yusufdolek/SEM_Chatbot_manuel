@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     
     <!-- CSS dosyamızı bağlıyoruz -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/widget.css') }}">
+    <link rel="stylesheet" href="/static/css/widget.css">
     
     <!-- Markdown formatlaması için kütüphane -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -119,26 +119,27 @@
     <div class="chat-widget-container">
         <div id="chat-widget">
             <div class="chat-header">
-                <img class="chat-header-logo" src="{{ url_for('static', filename='images/chatbot_title_logo.svg') }}" alt="Smart Assistant Logo">
+                <img class="chat-header-logo" src="/static/images/chatbot_title_logo.svg" alt="Smart Assistant Logo">
                 <button id="close-widget-btn" class="close-btn">↘</button>
             </div>
             <div id="messages">
                 <div class="message bot">
                     <div class="bubble">
-                        Welcome! 🚀 How can I help you learn more about SEM's services and achievements today?
+                        Welcome! 👋 I am Smart Assistant 🤖.  You can ask me anything about SEM.<br>
+                        I can assist you in both English and Turkish. 🇺🇸🇹🇷
                     </div>
                 </div>
             </div>
             <div id="input-area">
                 <input type="text" id="user-input" placeholder="Type a message..." autofocus />
                 <button id="send-btn" aria-label="Send Message">
-                    <img src="{{ url_for('static', filename='images/send_icon.svg') }}" alt="Send">
+                    <img src="/static/images/send_icon.svg" alt="Send">
                 </button>
             </div>
         </div>
 
         <button id="chat-toggle-btn">
-            <img src="{{ url_for('static', filename='images/chatbot_logo.svg') }}" alt="Chat Icon">
+            <img src="/static/images/chatbot_logo.svg" alt="Chat Icon">
         </button>
     </div>
     <!-- WIDGET SONU -->

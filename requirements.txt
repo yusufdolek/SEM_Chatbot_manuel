@@ -1,4 +1,5 @@
-flask
+fastapi
+uvicorn[standard]
 langchain
 faiss-cpu
 python-dotenv
@@ -6,3 +7,5 @@ google-generativeai
 PyPDF2
 sentence-transformers 
 PyMuPDF
+jinja2
+aiofiles
