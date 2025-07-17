@@ -40,6 +40,11 @@ async def index(request: Request):
     """Serve the main page"""
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/backpage", response_class=HTMLResponse)
+async def backpage(request: Request):
+    """Serve the backpage"""
+    return templates.TemplateResponse("backpage.html", {"request": request})
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(chat_message: ChatMessage):
     """

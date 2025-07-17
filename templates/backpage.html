@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEM Company Website</title>
+    <title>SEM Backpage</title>
     
     <!-- Poppins fontunu Google Fonts'tan ekliyoruz -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,25 +16,24 @@
     <!-- Markdown formatlaması için kütüphane -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-    <!-- YENİ: Sayfa bölümleri için stiller -->
+    <!-- Backpage specific styles -->
     <style>
         /* Tarayıcı varsayılan boşluklarını sıfırlıyoruz */
         html, body {
             margin: 0;
             padding: 0;
             font-family: 'Poppins', sans-serif;
-            scroll-behavior: smooth; /* Daha yumuşak bir kaydırma deneyimi için */
+            scroll-behavior: smooth;
         }
 
-        /* Her bir sayfa bölümü için genel stil */
         .page-section {
-            height: 100vh; /* Her bölüm ekran yüksekliği kadar olsun */
-            display: flex; /* İçeriği ortalamak için flexbox kullanıyoruz */
+            height: 100vh;
+            display: flex;
             justify-content: center;
             align-items: center;
             text-align: center;
             padding: 40px;
-            box-sizing: border-box; /* Padding'in yüksekliği etkilememesi için */
+            box-sizing: border-box;
         }
 
         .content-wrapper {
@@ -46,35 +45,9 @@
             margin-bottom: 1rem;
         }
 
-        .content-wrapper h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
         .content-wrapper p {
             font-size: 1.2rem;
             line-height: 1.6;
-        }
-
-        /* Renk Stilleri */
-        #page-white {
-            background-color: #ffffff;
-            color: #333333;
-        }
-
-        #page-gray {
-            background-color: #f4f4f4;
-            color: #333333;
-        }
-
-        #page-black {
-            background-color: #222222;
-            color: #ffffff;
-        }
-
-        #page-navy {
-            background-color: #001f3f; /* Lacivert */
-            color: #ffffff;
         }
 
         /* Navigation */
@@ -95,48 +68,30 @@
         .nav-link:hover {
             background: #0056b3;
         }
+
+        /* Backpage styling */
+        #backpage-main {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
     </style>
 </head>
 <body>
     <!-- Navigation Link -->
-    <a href="/backpage" class="nav-link">Backpage →</a>
+    <a href="/" class="nav-link">← Back to Home</a>
 
-    <!-- YENİ: Sayfa içeriği bölümlere ayrıldı -->
+    <!-- Backpage Content -->
     <main>
-        <!-- 1. BEYAZ BÖLÜM -->
-        <section id="page-white" class="page-section">
+        <section id="backpage-main" class="page-section">
             <div class="content-wrapper">
-                <h1>Welcome to SEM</h1>
-                <p>You can ask our chatbot anything about SEM. Try asking about our projects or services.</p>
-            </div>
-        </section>
-
-        <!-- 2. GRİ BÖLÜM -->
-        <section id="page-gray" class="page-section">
-            <div class="content-wrapper">
-                <h2>About Us</h2>
-                <p>We are a leading company in technology and innovation, dedicated to providing cutting-edge solutions for businesses worldwide.</p>
-            </div>
-        </section>
-
-        <!-- 3. SİYAH BÖLÜM -->
-        <section id="page-black" class="page-section">
-            <div class="content-wrapper">
-                <h2>Our Services</h2>
-                <p>From custom software development to advanced data analytics, we offer a wide range of services to help your business grow.</p>
-            </div>
-        </section>
-
-        <!-- 4. LACİVERT BÖLÜM -->
-        <section id="page-navy" class="page-section">
-            <div class="content-wrapper">
-                <h2>Contact Us</h2>
-                <p>Get in touch with us to learn more about how we can help you achieve your goals. Our chatbot is also ready to assist you!</p>
+                <h1>Welcome to Backpage</h1>
+                <p>This is the backpage for testing chatbot session persistence. The chatbot should maintain its conversation history when navigating between pages.</p>
+                <p>Try chatting with the bot, then navigate back to the home page to see if the conversation persists!</p>
             </div>
         </section>
     </main>
 
-    <!-- CHAT WIDGET YAPISI (Değiştirilmedi, sayfa kayarken sabit kalacak) -->
+    <!-- CHAT WIDGET YAPISI (Aynı widget, session persistence ile) -->
     <div class="chat-widget-container">
         <div id="chat-widget">
             <div class="chat-header">
@@ -160,7 +115,7 @@
     </div>
     <!-- WIDGET SONU -->
 
-    <!-- Lightbox HTML Structure (Değiştirilmedi) -->
+    <!-- Lightbox HTML Structure -->
     <div id="lightbox-overlay" class="lightbox-overlay">
         <div class="lightbox-content">
             <img id="lightbox-image" class="lightbox-image" src="" alt="">
@@ -168,7 +123,7 @@
         </div>
     </div>
 
-    <!-- JavaScript kodunda değişiklik yok, aynen kalabilir -->
+    <!-- JavaScript for chat persistence -->
     <script>
         // HTML Elementlerine erişim
         const messagesDiv = document.getElementById('messages');
