@@ -70,6 +70,95 @@ Arama doğruluğunu artırmak ve gereksiz LLM çağrılarını önlemek için **
 
 ---
 
+## 📊 Token Analizi ve Maliyet Raporu
+
+### **Mevcut Durum:**
+- **Toplam Doküman:** 113,749 karakter
+- **Toplam Token (Gemini API):** 25,215 token
+- **Sorgu başına maliyet:** $0.002041
+- **Aylık maliyet tahminleri:**
+  - 10 sorgu/gün: $0.61/ay
+  - 100 sorgu/gün: $6.12/ay
+  - 1000 sorgu/gün: $61.23/ay
+
+### **Tek Sorgu Analizi:**
+- **Sistem prompt:** 37 token
+- **Context (2000 karakter):** 399 token
+- **Kullanıcı sorgusu:** 5 token
+- **Toplam:** 441 token
+
+**Token Analizi Scripti:** `test_token.py` dosyası ile detaylı analiz yapılabilir.
+
+## 🚀 Optimizasyon Önerileri
+
+### **1. Token Optimizasyonu (Öncelik 1):**
+- **Chunk boyutu küçültme:** 400 → 300 karakter
+- **Daha yüksek similarity threshold:** 0.25 → 0.35
+- **Context window sınırı:** Maksimum 3 chunk kullan
+- **Query classification:** Basit sorular için daha az context
+
+### **2. Retrieval İyileştirmeleri:**
+- **Hybrid search:** Semantic + keyword search
+- **Query expansion:** Eş anlamlı kelimeler ekle
+- **Document ranking:** Relevance score'a göre sıralama
+- **Negative sampling:** İlgisiz dokümanları filtrele
+
+### **3. Caching Stratejileri:**
+- **Response caching:** Sık sorulan sorular için
+- **Embedding caching:** Aynı query'ler için
+- **Context caching:** Benzer dokümanlar için
+- **Session-based caching:** Kullanıcı başına
+
+### **4. Advanced RAG Teknikleri:**
+- **Self-querying:** Query'yi kategorize et
+- **Multi-hop reasoning:** Birden fazla doküman kullan
+- **Query rewriting:** Sorguyu optimize et
+- **Contextual compression:** Gereksiz bilgileri çıkar
+
+## 💻 Kod Geliştirmeleri
+
+### **1. Performans Optimizasyonu:**
+```python
+# Async processing
+async def process_multiple_queries()
+# Connection pooling
+# Background indexing
+# Lazy loading
+```
+
+### **2. Hata Yönetimi:**
+```python
+# Retry mechanism
+# Graceful degradation
+# Fallback responses
+# Health checks
+```
+
+### **3. Monitoring & Analytics:**
+```python
+# Query analytics
+# Token usage tracking
+# Performance metrics
+# User behavior analysis
+```
+
+### **4. Güvenlik İyileştirmeleri:**
+```python
+# Rate limiting
+# Input validation
+# SQL injection protection
+# XSS prevention
+```
+
+## 🔧 Debug ve Test Araçları
+
+### **Chunk Analizi:**
+- **chunks.txt dosyası:** Tüm chunk'ları test amaçlı dışa aktarma
+- **⚠️ Dikkat:** chunks.txt dosyası test sonrası silinmelidir (hassas bilgi içerebilir)
+- **Kullanım:** Debug ve chunk kalitesi analizi için
+
+---
+
 ## 🚀 Projeyi Çalıştırma
 
 1.  **Depoyu Klonlayın:**

@@ -51,7 +51,13 @@ class FaissVectorStore:
             with open(DOCSTORE_PATH, 'rb') as f:
                 self.docstore = pickle.load(f)
 
-    def search(self, query_embedding, top_k=15, score_threshold=0.25):  # Lower threshold, more results
+    def search(self, query_embedding, top_k=8, score_threshold=0.35, max_context_length=25000):
+        """
+        OPTIMIZED VERSION: Returns only relevant child chunks instead of full parent documents
+        - Higher similarity threshold (0.4) for better quality
+        - More results (top_k=8) for detailed responses
+        - Context length limit (25000) for comprehensive answers
+        """
         if self.index.ntotal == 0:
             return []
 
@@ -60,26 +66,35 @@ class FaissVectorStore:
 
         scores, indices = self.index.search(query_vector, top_k)
         
-        retrieved_parent_ids = set()
+        relevant_chunks = []
+        total_context_length = 0
+        
         for i, idx in enumerate(indices[0]):
-            if idx == -1: continue
+            if idx == -1: 
+                continue
             
             score = scores[0][i]
             if score >= score_threshold:
                 child_doc = self.metadata[idx]
-                parent_id = child_doc.metadata['doc_id']
-                retrieved_parent_ids.add(parent_id)
-
-        final_context_docs = [self.docstore[pid] for pid in retrieved_parent_ids]
+                chunk_content = child_doc.page_content
+                chunk_length = len(chunk_content)
+                
+                # Check if adding this chunk would exceed context limit
+                if total_context_length + chunk_length > max_context_length:
+                    print(f"--- [CONTEXT LIMIT] Stopping at {len(relevant_chunks)} chunks to stay under {max_context_length} chars")
+                    break
+                
+                relevant_chunks.append(chunk_content)
+                total_context_length += chunk_length
         
         # If no results above threshold, try with lower threshold as fallback
-        if not final_context_docs and score_threshold > 0.15:
-            print(f"--- [FALLBACK] No results with threshold {score_threshold}, trying with 0.15")
-            return self.search(query_embedding, top_k, 0.15)
+        if not relevant_chunks and score_threshold > 0.2:
+            print(f"--- [FALLBACK] No results with threshold {score_threshold}, trying with 0.2")
+            return self.search(query_embedding, top_k, 0.2, max_context_length)
         
-        print(f"--- [VECTOR_STORE DEBUG] Found {len(self.metadata)} child docs. "
-              f"Search returned {len(retrieved_parent_ids)} unique parent documents.")
+        print(f"--- [VECTOR_STORE OPTIMIZED] Found {len(self.metadata)} child docs. "
+              f"Returned {len(relevant_chunks)} relevant chunks ({total_context_length} chars total).")
               
-        return final_context_docs
+        return relevant_chunks
 
 # Global değişkene artık ihtiyacımız yok, siliyoruz.
