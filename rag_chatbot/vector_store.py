@@ -81,7 +81,7 @@ class FaissVectorStore:
                 
                 # Check if adding this chunk would exceed context limit
                 if total_context_length + chunk_length > max_context_length:
-                    print(f"--- [CONTEXT LIMIT] Stopping at {len(relevant_chunks)} chunks to stay under {max_context_length} chars")
+                    print(f"--- [CONTEXT LIMIT] Stopping at {len(relevant_chunks)} chunks")
                     break
                 
                 relevant_chunks.append(chunk_content)
@@ -89,10 +89,10 @@ class FaissVectorStore:
         
         # If no results above threshold, try with lower threshold as fallback
         if not relevant_chunks and score_threshold > 0.2:
-            print(f"--- [FALLBACK] No results with threshold {score_threshold}, trying with 0.2")
+            print(f"--- [FALLBACK] No results with threshold {score_threshold}, trying 0.2")
             return self.search(query_embedding, top_k, 0.2, max_context_length)
         
-        print(f"--- [VECTOR_STORE OPTIMIZED] Found {len(self.metadata)} child docs. "
+        print(f"--- [VECTOR_STORE] Found {len(self.metadata)} child docs. "
               f"Returned {len(relevant_chunks)} relevant chunks ({total_context_length} chars total).")
               
         return relevant_chunks

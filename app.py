@@ -1,4 +1,4 @@
-# app.py - Main FastAPI application
+# SEM RAG Chatbot FastAPI Application
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse
@@ -12,7 +12,7 @@ from rag_chatbot.chatbot import get_chatbot_response
 # Load environment variables from .env
 load_dotenv()
 
-# Debug: Check if API key is loaded
+# Check API key availability
 import os
 print(f"✅ GEMINI_API_KEY loaded: {'YES' if os.getenv('GEMINI_API_KEY') else 'NO'}")
 

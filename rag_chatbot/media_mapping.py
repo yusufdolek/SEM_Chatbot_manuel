@@ -106,11 +106,6 @@ class MediaMapping:
         # Brand keywords
         self.brand_keywords = list(self.media_map.keys())
     
-    def load_media_from_pdf(self, pdf_content: str):
-        """Load media URLs from PDF content - already implemented in media_map above"""
-        # All media URLs from PDF have been loaded into the media_map dictionary
-        # This function is kept for future PDF updates if needed
-        pass
     
     def find_relevant_media(self, user_query: str) -> Dict[str, List[str]]:
         """Find relevant media for a user query"""

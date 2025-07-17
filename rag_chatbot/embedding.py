@@ -7,7 +7,7 @@ class LocalEmbeddingFunction:
     def __init__(self):
         self.model = SentenceTransformer(MODEL_NAME)
         
-        # Brand name mappings for better semantic matching
+        # Simple brand name mappings for consistency
         self.brand_mappings = {
             'lcwaikiki': 'LC WAIKIKI',
             'lc waikiki': 'LC WAIKIKI', 
@@ -21,33 +21,18 @@ class LocalEmbeddingFunction:
             'turkiye is bankasi': 'TÜRKİYE İŞ BANKASI',
             'qnb finansbank': 'QNB FINANSBANK'
         }
-        
-        # Synonyms for project/case study terms
-        self.project_synonyms = {
-            'project': ['project', 'case study', 'success story', 'campaign', 'case', 'work'],
-            'case study': ['project', 'case study', 'success story', 'campaign', 'case', 'work'],
-            'campaign': ['project', 'case study', 'success story', 'campaign', 'case', 'work']
-        }
     
     def preprocess_text(self, text):
-        """Enhanced text preprocessing for better semantic matching"""
+        """Simple text preprocessing for brand normalization"""
         if not text:
             return text
             
         # Convert to lowercase for processing
         processed = text.lower()
         
-        # Normalize brand names
+        # Simple brand name normalization
         for brand_key, brand_value in self.brand_mappings.items():
             processed = re.sub(r'\b' + re.escape(brand_key) + r'\b', brand_value, processed, flags=re.IGNORECASE)
-        
-        # Add project/case study synonyms for query expansion
-        for term, synonyms in self.project_synonyms.items():
-            if term in processed:
-                # Add synonyms to increase matching probability
-                synonym_text = ' '.join(synonyms)
-                processed = f"{processed} {synonym_text}"
-                break
         
         return processed
 
