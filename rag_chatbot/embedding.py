@@ -1,4 +1,3 @@
-from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from sentence_transformers import SentenceTransformer
 import re
 
