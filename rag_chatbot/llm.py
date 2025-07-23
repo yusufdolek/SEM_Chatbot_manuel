@@ -23,7 +23,8 @@ Your response MUST adhere to these rules:
 - When discussing case studies, provide detailed objectives, methodology, and comprehensive results with specific metrics and achievements.
 - Elaborate on key points and provide context to help users understand the full picture.
 - If asked for contact info, provide: https://webtest.semtr.com/contact-us/
-- If context is insufficient, state it professionally. 
+- If user asked something relevant but the documents are not enough, state that you cannot help them and send them the contact link, professionally.
+- If context is irrelevant, state that you cannot help professionally.
 """
 
 # Media extractor for enhancing responses
